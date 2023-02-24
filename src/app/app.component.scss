@@ -1,0 +1,28 @@
+.example-form-fields {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+form {
+    width:600px;
+    margin:auto;
+    padding-top: 35px;
+    display:block;
+    float:none;
+}
+@media (max-width: 650px){
+    form{
+        width: auto;
+        padding: 15px;
+    }
+}
+
+@media (max-width: 550px){
+    .label {
+        display: none;
+    }
+    .submit-btn {
+        width: 100%!important;
+        min-width: unset!important;
+    }
+}

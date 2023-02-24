@@ -1,0 +1,18 @@
+<div mat-dialog-title class="title">
+    <img class="logo" src="assets/logo.svg" />
+    <h1>Result</h1>
+    <button mat-icon-button class="close-icon" [mat-dialog-close]="true">
+        <mat-icon>close</mat-icon>
+    </button>
+</div>
+<div mat-dialog-content class="content">
+    <p>
+        start: {{data.start}}
+    </p>
+    <p>
+        end: {{data.end}}
+    </p>
+</div>
+<div mat-dialog-actions>
+    <button mat-button mat-stroked-button color="accent" cdkFocusInitial (click)="dialogRef.close()">Close</button>
+</div>

@@ -1,0 +1,53 @@
+:host {
+    text-align: center;
+}  
+.logo{
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.mdc-dialog__actions{
+    justify-content: center;
+}
+.close-icon {
+    display: none;
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+.content {
+    color: black;
+}
+@media (max-width: 550px){
+    .close-icon {
+        display: block;
+    }
+    .mat-mdc-dialog-title {
+        display: flex;
+        justify-content: center;
+    }
+    .logo{
+        position: unset;
+        transform: none;
+        width: 30px;
+    }
+    .title {
+        padding-bottom: 0;
+        border-bottom: 1px solid #ddd;
+    }
+    .content {
+        margin-top: 20px;
+    }
+    h1 {
+        font-size: 16px;
+        padding-left: 5px;
+    }
+    :host {
+        max-width: '100vw';
+        max-height: '100vh';
+        height: '100%';
+        width: '100%';
+    }
+    
+}
