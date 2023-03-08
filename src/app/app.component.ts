@@ -9,10 +9,10 @@ import {
 } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ResultDialogComponent } from './result-dialog/result-dialog.component';
-import * as dayjs from 'dayjs';
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 import { DatePipe } from '@angular/common';
 import { MomentDateAdapter } from '@angular/material-moment-adapter';
+import * as moment from 'moment';
 
 const APP_FORMATS = {
   parse: {
@@ -46,14 +46,15 @@ const APP_FORMATS = {
 export class AppComponent {
   timeList: any = [];
   myForm!: FormGroup;
+  diff: number = -3600000 // 1 hour 
 
   constructor(public dialog: MatDialog) { }
   /* Reactive form */
   reactiveForm() {
     this.myForm = new FormGroup(
       {
-        startDate: new FormControl(new Date(), [Validators.required]),
-        endDate: new FormControl(new Date(), Validators.required),
+        startDate: new FormControl(moment(), [Validators.required]),
+        endDate: new FormControl(moment(), Validators.required),
         startTime: new FormControl('00:00', [Validators.required]),
         endTime: new FormControl('00:00', Validators.required),
       },
@@ -78,27 +79,39 @@ export class AppComponent {
     this.initialize();
 
     this.myForm.get('startDate')?.valueChanges.subscribe((s) => {
-      let convertedDate = new Date(s);
+      let convertedDate = moment(s)
       let time = this.myForm.get('startTime')?.getRawValue();
       this.updateEndDateTime(convertedDate, time);
     });
     this.myForm.get('startTime')?.valueChanges.subscribe((s) => {
       this.updateEndDateTime(this.myForm.get('startDate')?.getRawValue(), s);
     });
+    this.myForm.get('endDate')?.valueChanges.subscribe((s) => {
+      let endT = this.myForm.get('endTime')?.getRawValue();
+      this.setDiff(s, endT)
+    });
+    this.myForm.get('endTime')?.valueChanges.subscribe((s) => {
+      let endD = this.myForm.get('endDate')?.getRawValue();
+      this.setDiff(endD, s)
+    });
   }
 
-  onlyDate(date: any | null = null, toDate: boolean = false) {
+  setDiff(endD: moment.Moment, endT: string) {
+    let startD = this.myForm.get('startDate')?.getRawValue();
+    let startT = this.myForm.get('startTime')?.getRawValue();
+    let startDT = this.mergeDateAndTime(this.onlyDate(startD), startT)
+    let endDT = this.mergeDateAndTime(this.onlyDate(endD), endT)
+    this.diff = startDT.diff(endDT)
+  }
+
+  onlyDate(date: any | null = null) {
     let d
     if (!date) {
-      d = dayjs();
+      d = moment();
     } else {
-      d = dayjs(date);
+      d = moment(date);
     }
-    d = d.hour(0).minute(0).second(0).millisecond(0)
-    if (!toDate) {
-      return d
-    }
-    return d.toDate()
+    return d.hour(0).minute(0).second(0).millisecond(0)
   }
 
   initialize() {
@@ -115,9 +128,9 @@ export class AppComponent {
 
   getConvertedDateTime(date: any | string | null = null) {
     if (!date) {
-      return [this.onlyDate(null, true), dayjs().format('HH:mm')];
+      return [this.onlyDate(null), moment().format('HH:mm')];
     } else {
-      return [this.onlyDate(date, true), dayjs(date).format('HH:mm')];
+      return [this.onlyDate(date), moment(date).format('HH:mm')];
     }
   }
 
@@ -127,9 +140,9 @@ export class AppComponent {
     return `${h < 10 ? '0' + h : h}:${m < 10 ? '00' : m}`;
   }
 
-  updateEndDateTime(d: Date, t: string) {
+  updateEndDateTime(d: moment.Moment, t: string) {
     let dt = this.mergeDateAndTime(this.onlyDate(d), t)
-    let [ed, et] = this.getConvertedDateTime(dt.add(1, 'h').toDate());
+    let [ed, et] = this.getConvertedDateTime(dt.subtract(this.diff));
     this.myForm.get('endDate')!.setValue(ed, {
       onlyself: true,
     });
@@ -147,9 +160,9 @@ export class AppComponent {
     let endTimeFormC = control.get('endTime');
     if (!startDateFormC || !startTimeFormC || !endDateFormC || !endTimeFormC)
       return null;
-    let startDate = this.onlyDate(dayjs(startDateFormC.value)) as dayjs.Dayjs
-    let endDate = this.onlyDate(dayjs(endDateFormC.value)) as dayjs.Dayjs;
-    if (!(startDate.isBefore(endDate) || startDate.isSame(endDate))) {
+    let startDate = this.onlyDate(moment(startDateFormC.value)) as moment.Moment
+    let endDate = this.onlyDate(moment(endDateFormC.value)) as moment.Moment
+    if (!(startDate.isSameOrBefore(endDate))) {
       endDateFormC?.setErrors({ inValid: true });
       endTimeFormC?.setErrors(null);
       return { endDate: true };
@@ -175,8 +188,8 @@ export class AppComponent {
     }
   }
 
-  mergeDateAndTime(date: Date | dayjs.Dayjs, time: string) {
-    return (this.onlyDate(dayjs(date)) as dayjs.Dayjs)
+  mergeDateAndTime(date: Date | moment.Moment, time: string) {
+    return (this.onlyDate(moment(date)) as moment.Moment)
       .add(this.splitHM(time).hour, 'h')
       .add(this.splitHM(time).minute, 'm')
   }
