@@ -96,7 +96,7 @@ export class AppComponent {
   getFormatedTime(time: string) {
     let h = this.splitHM(time).hour;
     let m = Math.floor(this.splitHM(time).minute / 15) * 15;
-    return `${h}:${m < 10 ? '00' : m}`;
+    return `${h < 10 ? '0' + h : h}:${m < 10 ? '00' : m}`;
   }
 
   updateEndDateTime(d: Date, t: string) {
